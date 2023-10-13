@@ -6,8 +6,7 @@ class Program
     static void Main(string[] args)
     {
         Console.WriteLine("Enter or past Path:");
-        //var dirPath = Console.ReadLine();
-        var dirPath = "C:\\Users\\rondi\\OneDrive\\Documents\\Velozient\\Input.txt";
+        var dirPath = Console.ReadLine();
 
         if (File.Exists(dirPath))
         {
