@@ -1,0 +1,22 @@
+# Arquivos de compilação
+bin/
+obj/
+
+# Arquivos de log
+*.log
+
+# Dependências do NuGet
+packages/
+
+# Arquivos de usuário do Visual Studio
+*.user
+*.suo
+*.sln.docstates
+
+# Arquivos de cache do Visual Studio
+.vs/
+_resharper/
+
+# Arquivos temporários
+[Tt]emp/
+obj/
