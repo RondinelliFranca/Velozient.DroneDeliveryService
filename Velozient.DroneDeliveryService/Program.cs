@@ -7,6 +7,7 @@ class Program
     {
         Console.WriteLine("Enter or past Path:");
         var dirPath = Console.ReadLine();
+        
 
         if (File.Exists(dirPath))
         {

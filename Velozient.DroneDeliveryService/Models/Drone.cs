@@ -4,9 +4,9 @@
     {
         public string Name { get; }
         public int MaximumCapacity { get; }
-        public int CurrentWeight { get; set; } = 0;
+        public int CurrentWeight { get; set; }
         public List<Location>? Deliveries { get; set; }
-        public int Trip { get; set; } = 0;
+        public int Trip { get; set; }
         public List<Trip> Trips { get; set; }
 
         public Drone(string name, int maxCapacity)
@@ -59,7 +59,7 @@
                 drone.Trip++;
                 drone.Trips.Add(new Trip(drone.Trip, drone.Deliveries));
 
-                Drone.ReturnToHomeBase(drone);
+                ReturnToHomeBase(drone);
             }
         }
     }
