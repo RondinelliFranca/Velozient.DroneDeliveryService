@@ -5,7 +5,7 @@
         public string Name { get; }
         public int MaximumCapacity { get; }
         public int CurrentWeight { get; set; }
-        public List<Location>? Deliveries { get; set; }
+        public List<Delivery>? Deliveries { get; set; }
         public int Trip { get; set; }
         public List<Trip> Trips { get; set; }
 
@@ -13,14 +13,14 @@
         {
             Name = name;
             MaximumCapacity = maxCapacity;
-            Deliveries = new List<Location>();
+            Deliveries = new List<Delivery>();
             Trips = new List<Trip>();
         }
 
         public static List<Drone> CreateDrones(string dirPath)
         {
             var dronesString = File.ReadLines(dirPath).First().Split(", ");
-            dronesString = UseFulString.RemoveBrackets(dronesString);
+            dronesString = UsefulString.RemoveBrackets(dronesString);
             var drones = new List<Drone>();
             for (var i = 0; i < dronesString.Length; i += 2)
             {
@@ -32,35 +32,27 @@
             return drones;
         }
 
-        public static bool CheckDroneFullLoad(List<Drone> drones)
+        public bool CheckIfDroneHasCapacity(int packageWeight)
         {
-            return drones.Exists(e => e.CurrentWeight != e.MaximumCapacity);
+            return CurrentWeight + packageWeight <= MaximumCapacity;
+        }
+        public void ReturnHomeBase()
+        {
+            CurrentWeight = 0;
+            Deliveries = null;
+            Deliveries = new List<Delivery>();
+        }
+        public void AddDelivery(Delivery delivery)
+        {
+            delivery.TriedLoad = true;
+            CurrentWeight += delivery.PackageWeight;
+            Deliveries.Add(delivery);
         }
 
-        public static bool CheckCurrentDroneCapacity(int currentWeightDrone, int maximumCapacity, int packageWeight)
-        {
-            return currentWeightDrone + packageWeight > maximumCapacity;
-        }
-        public static void ReturnToHomeBase(Drone drone)
-        {
-            drone.CurrentWeight = 0;
-            drone.Deliveries = null;
-            drone.Deliveries = new List<Location>();
-        }
+        public bool IsFullLoad() => CurrentWeight == MaximumCapacity;
+        public bool HasSomeDelivery() => Deliveries.Any();
 
-        public static bool CheckPossibleDeliver(List<Drone> drones, int packageWeight)
-        {
-            return drones.Exists(d => d.MaximumCapacity >= packageWeight);
-        }
-        public static void ToDoTrip(List<Drone> drones)
-        {
-            foreach (var drone in drones.Where(drone => drone.Deliveries.Any()).OrderBy(d => d.Name))
-            {
-                drone.Trip++;
-                drone.Trips.Add(new Trip(drone.Trip, drone.Deliveries));
-
-                ReturnToHomeBase(drone);
-            }
-        }
+        public bool IsTheWeightSupported(int packageWeight) => MaximumCapacity >= packageWeight;
     }
 }
+
