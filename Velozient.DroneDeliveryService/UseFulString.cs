@@ -1,6 +1,6 @@
 ﻿namespace Velozient.DroneDeliveryService;
 
-public static class UseFulString
+public static class UsefulString
 {
     public static string[] RemoveBrackets(string[] list)
     {

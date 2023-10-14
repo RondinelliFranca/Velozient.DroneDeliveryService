@@ -8,23 +8,22 @@ class Program
         Console.WriteLine("Enter or past Path:");
         var dirPath = Console.ReadLine();
         
-
         if (File.Exists(dirPath))
         {
             var drones = Drone.CreateDrones(dirPath);
 
-            var locations = Location.CreateLocations(dirPath);
+            var deliveries = Delivery.CreateDeliveries(dirPath);
 
             // Sort drones in descending order of max weight
             drones = drones.OrderByDescending(d => d.MaximumCapacity).ToList();
 
-            // Sort locations in descending order of package weight
-            locations = locations.OrderByDescending(l => l.PackageWeight).ToList();
+            // Sort deliveries in descending order of package weight
+            deliveries = deliveries.OrderByDescending(l => l.PackageWeight).ToList();
 
             //Create output file
             using var sw = new StreamWriter(Path.Combine(Path.GetDirectoryName(dirPath), "Output.txt"));
 
-            OtimizeTrips(locations, drones, sw);
+            OptimizeTrips(deliveries, drones, sw);
             Trip.GetTrips(drones, sw);
         }
         else
@@ -34,51 +33,44 @@ class Program
     }
 
     /// <summary>
-    /// Distribute locations to drones and optimize trips
+    /// Distribute deliveries to drones and optimize trips
     /// </summary>
-    /// <param name="locations"></param>
+    /// <param name="deliveries"></param>
     /// <param name="drones"></param>
     /// <param name="sw"></param>
-    private static void OtimizeTrips(List<Location> locations, List<Drone> drones, StreamWriter sw)
+    private static void OptimizeTrips(List<Delivery> deliveries, List<Drone> drones, StreamWriter sw)
     {
-        foreach (var location in locations.Where(location => !location.CheckDeliverie))
+        foreach (var delivery in deliveries.Where(delivery => !delivery.TriedLoad))
         {
             foreach (var drone in drones)
             {
-                if (!Drone.CheckDroneFullLoad(drones))
+                if (drones.All(drone => drone.IsFullLoad()))
                 {
-                    Drone.ToDoTrip(drones);
-                    OtimizeTrips(locations, drones, sw);
+                    Trip.ToDoTrip(drones);
+                    OptimizeTrips(deliveries, drones, sw);
                     break;
                 }
-                if (drone.MaximumCapacity >= location.PackageWeight && drone.CurrentWeight <= drone.MaximumCapacity)
+
+                if (drone.CheckIfDroneHasCapacity(delivery.PackageWeight))
                 {
-                    if (!Drone.CheckCurrentDroneCapacity(drone.CurrentWeight, drone.MaximumCapacity, location.PackageWeight))
-                    {
-                        drone.CurrentWeight += location.PackageWeight;
-                        drone.Deliveries.Add(location);
-                        location.CheckDeliverie = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    //If there is a weight that the drones cannot support
-                    if (Drone.CheckPossibleDeliver(drones, location.PackageWeight)) continue;
-                    sw.WriteLine($"This package: {location.Name} cannot be delivered, because its weight {location.PackageWeight} cannot be supported.");
-                    location.CheckDeliverie = true;
-                    sw.WriteLine(Environment.NewLine);
+                    drone.AddDelivery(delivery);
                     break;
                 }
+                //If there is a weight that the drones cannot support
+                if (drones.Any(drone => drone.IsTheWeightSupported(delivery.PackageWeight))) continue;
+                sw.WriteLine(
+                    $"This package: {delivery.Name} cannot be delivered, because its weight {delivery.PackageWeight} cannot be supported.");
+                delivery.TriedLoad = true;
+                sw.WriteLine(Environment.NewLine);
+                break;
             }
         }
-        while (Location.CheckDeliveries(locations))
-        {
-            Drone.ToDoTrip(drones);
-            OtimizeTrips(locations, drones, sw);
-        }
-        Drone.ToDoTrip(drones);//the last trip
-        
-    }
-}
 
+        while (Delivery.CheckDeliveries(deliveries))
+        {
+            Trip.ToDoTrip(drones);
+            OptimizeTrips(deliveries, drones, sw);
+        }
+        Trip.ToDoTrip(drones); //the last trip
+    } 
+}

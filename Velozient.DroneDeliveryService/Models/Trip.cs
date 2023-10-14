@@ -2,13 +2,13 @@
 
 public class Trip
 {
-    public Trip(int numberTrip, List<Location> locations)
+    public int NumberTrip { get; set; }
+    public List<Delivery> Locations { get; set; }
+    public Trip(int numberTrip, List<Delivery> locations)
     {
         NumberTrip = numberTrip;
         Locations = locations;
     }
-    public int NumberTrip { get; set; }
-    public List<Location> Locations { get; set; }
 
     public static void GetTrips(List<Drone> drones, StreamWriter sw)
     {
@@ -26,6 +26,17 @@ public class Trip
                 sw.WriteLine();
             }
             sw.WriteLine(Environment.NewLine);
+        }
+    }
+
+    public static void ToDoTrip(List<Drone> drones)
+    {
+        foreach (var drone in drones.Where(drone => drone.HasSomeDelivery()).OrderBy(d => d.Name))
+        {
+            drone.Trip++;
+            drone.Trips.Add(new Trip(drone.Trip, drone.Deliveries));
+
+            drone.ReturnHomeBase();
         }
     }
 }
